@@ -22,8 +22,17 @@ releases.
 6. Recheck the name/version immediately before publishing. Authenticate with
    npm locally or configure an npm trusted publisher for this repository.
    Credentials and local `.npmrc` files must never enter Git.
-7. Publish the inspected tarball with `npm publish <tarball> --access public`
-   when the maintainer decides to release. This CI does not publish packages.
+7. For the first release, publish the inspected tarball with
+   `npm publish <tarball> --access public` after interactive login and 2FA.
+   npm requires an existing package before configuring a trusted publisher.
+8. Configure the npm trusted publisher: owner `otaviouss`, repository
+   `codevariability-js`, workflow filename `release.yml`, environment `npm`.
+   Future releases dispatch `.github/workflows/release.yml` from `main` with
+   `publish=true`. With `publish=false`, it validates and builds only.
+   Only the isolated publishing job has `id-token: write`; ordinary CI does
+   not publish. Use GitHub-hosted runners and npm CLI 11.5.1+.
+9. Verify registry integrity and a fresh installation before creating the
+   matching GitHub release. Never commit local npm credentials.
 
 For npm trusted publishing use the requirements documented by npm (currently
 npm CLI 11.5.1+ and Node 22.14.0+). A trusted publisher requires explicit

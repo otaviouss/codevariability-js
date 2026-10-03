@@ -6,21 +6,18 @@ statistics, representative rankings, and JSON results without executing the
 input programs. The package is JavaScript with a CommonJS API and a CLI;
 TypeScript is a supported input language.
 
-Version **0.2.0** is being prepared for the first release from this independent
-repository. It preserves the v2 structural metric definitions of the source
+Version **0.2.0** is the first release from this independent repository. It preserves the v2 structural metric definitions of the source
 implementation. The package is alpha and requires Node.js 18 or later.
 
 ## Installation
 
-To use a checkout before the first npm release:
+Install from npm:
 
 ```bash
-npm ci
-node examples/basic.js
-node bin/codevariability-js.js --version
+npm install codevariability-js@0.2.0
 ```
 
-After publication, install with `npm install codevariability-js`. The installed
+For development, use `npm ci` in a checkout and run `node examples/basic.js`. The installed
 CLI is `codevariability-js`. No Python installation is required.
 
 ## Quick start
@@ -123,9 +120,9 @@ to generate the reviewed npm tarball. See [CONTRIBUTING.md](https://github.com/o
 
 MIT license, copyright 2026 Otávio Gomes. See [LICENSE](https://github.com/otaviouss/codevariability-js/blob/main/LICENSE).
 
-## Candidate compatibility
+## Compatibility
 
-Version 0.2.0 remains unreleased. Files select JS, JSX, TS, or TSX grammar by
+Files select JS, JSX, TS, or TSX grammar by
 extension. Markdown fences use `js`/`javascript`, `jsx`, `ts`/`typescript`, or
 `tsx`; unlabeled fences use JS. Fences retain their code, including prefixes;
 prose, inline code, and HTML outside fences are ignored. Inputs must be valid
