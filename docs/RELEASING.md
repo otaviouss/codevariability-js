@@ -1,13 +1,13 @@
 # Releasing the npm package
 
-Version 0.2.0 is prepared, not yet published from this independent repository.
+Version 0.2.0 was first published on 2026-10-03 from this independent repository.
 The historical adapter metadata says 0.1.0 but its current source already uses
 v2 parsing/normalization and metric IDs. The new 0.2.0 release makes that
 behavior and the independent repository explicit without inventing past npm
 releases.
 
-1. Make the initially private repository public before the public package
-   release. Confirm README links, repository/homepage/bugs URLs, authorship,
+1. Confirm that the repository is public and verify README links,
+   repository/homepage/bugs URLs, authorship,
    license, package ownership, and version availability.
 2. Update package.json and package-lock.json versions together. Update
    CHANGELOG and the publication checklist. Metric definition changes also
@@ -42,4 +42,4 @@ https://docs.npmjs.com/trusted-publishers/ for the current procedure.
 Validate this candidate on Node 18, 22, and 24, including original, adversarial,
 and regression suites and fresh installations of the actual tarball. Source
 normalization IDs changed to v3 before the first publication; formula IDs stay
-v2. The package remains 0.2.0 because this candidate has never been published.
+v2. Version 0.2.0 is published; subsequent changes require a new package version.

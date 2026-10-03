@@ -62,7 +62,7 @@ input SHA-256 hashes. Compare results only with compatible definitions and
 parser versions. Python and Babel have different grammars and tree node types;
 the packages do not promise cross-language score equivalence.
 
-The unreleased 0.2.0 candidate uses `babel_ast_pipeline_v3` and normalization
+Version 0.2.0 uses `babel_ast_pipeline_v3` and normalization
 IDs `babel_normalized_ast_tree_v3` / `babel_ast_node_type_multiset_v3` to identify
 the corrected grammar, Markdown, and empty-program behavior. Formula IDs stay
 at v2. Previous cache entries cannot match the new pipeline key. Results with
