@@ -1,0 +1,48 @@
+{
+  "name": "codevariability-js",
+  "version": "0.2.0",
+  "description": "Structural similarity analysis for JavaScript and TypeScript source-code collections.",
+  "type": "commonjs",
+  "author": "Otávio Gomes",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/otaviouss/codevariability-js.git"
+  },
+  "bugs": {
+    "url": "https://github.com/otaviouss/codevariability-js/issues"
+  },
+  "homepage": "https://github.com/otaviouss/codevariability-js#readme",
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "bin": {
+    "codevariability-js": "bin/codevariability-js.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/index.js && node --check src/ast-tree-edit.js && node --check src/fragments.js && node --check src/output.js && node --check bin/codevariability-js.js",
+    "build": "npm run check"
+  },
+  "keywords": [
+    "code similarity",
+    "ast",
+    "typescript",
+    "jsx",
+    "software metrics"
+  ],
+  "files": [
+    "src/",
+    "bin/",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "dependencies": {
+    "@babel/parser": "^7.29.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

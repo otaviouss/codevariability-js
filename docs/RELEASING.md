@@ -1,0 +1,31 @@
+# Releasing the npm package
+
+Version 0.2.0 is prepared, not yet published from this independent repository.
+The historical adapter metadata says 0.1.0 but its current source already uses
+v2 parsing/normalization and metric IDs. The new 0.2.0 release makes that
+behavior and the independent repository explicit without inventing past npm
+releases.
+
+1. Make the initially private repository public before the public package
+   release. Confirm README links, repository/homepage/bugs URLs, authorship,
+   license, package ownership, and version availability.
+2. Update package.json and package-lock.json versions together. Update
+   CHANGELOG and the publication checklist. Metric definition changes also
+   require updated versioned IDs, independent of the package version.
+3. From a clean checkout run `npm ci`, `npm run build`, `npm test`, and
+   `npm audit --omit=dev --audit-level=low`.
+4. Run `npm pack --dry-run`, then `npm pack`. Inspect the actual tarball:
+   package metadata, README, license, changelog, and only `src/` and `bin/`
+   should be present. Test files and repository maintenance files stay out.
+5. Install the tarball into an empty npm project. Run the API example, installed
+   CLI, and test an ESM default import of the CommonJS package.
+6. Recheck the name/version immediately before publishing. Authenticate with
+   npm locally or configure an npm trusted publisher for this repository.
+   Credentials and local `.npmrc` files must never enter Git.
+7. Publish the inspected tarball with `npm publish <tarball> --access public`
+   when the maintainer decides to release. This CI does not publish packages.
+
+For npm trusted publishing use the requirements documented by npm (currently
+npm CLI 11.5.1+ and Node 22.14.0+). A trusted publisher requires explicit
+configuration in the registry. See
+https://docs.npmjs.com/trusted-publishers/ for the current procedure.

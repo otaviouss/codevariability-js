@@ -1,0 +1,17 @@
+node_modules/
+coverage/
+.nyc_output/
+dist/
+build/
+*.tgz
+*.log
+.env
+.env.*
+.npmrc
+*.pem
+*.key
+.idea/
+.vscode/
+.DS_Store
+analysis-output/
+.codevariability-cache/

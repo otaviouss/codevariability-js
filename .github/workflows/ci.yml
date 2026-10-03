@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  node:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18, 22, 24]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - run: npm audit --omit=dev --audit-level=low
+      - run: node examples/basic.js
+      - name: Pack and install in an empty project
+        run: |
+          tarball=$(npm pack --pack-destination "$RUNNER_TEMP")
+          mkdir "$RUNNER_TEMP/npm-consumer"
+          cp examples/basic.js "$RUNNER_TEMP/npm-consumer/example.js"
+          cp -R examples/inputs "$RUNNER_TEMP/npm-consumer/inputs"
+          cd "$RUNNER_TEMP/npm-consumer"
+          npm init -y
+          npm install "$RUNNER_TEMP/$tarball"
+          node example.js
+          node --input-type=module -e "import api from 'codevariability-js'; if (typeof api.analyzeFiles !== 'function') process.exit(1)"
+          npx --no-install codevariability-js --version
+          npx --no-install codevariability-js ast --directory inputs --metric all --output analysis.json
