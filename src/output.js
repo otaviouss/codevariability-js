@@ -14,6 +14,7 @@ function rejectSymlink(target) {
 function writeJsonAtomic(target, content) {
   target = path.resolve(target);
   rejectSymlink(target);
+  fs.mkdirSync(path.dirname(target), { recursive: true });
   const temporary = path.join(path.dirname(target), `.codevariability-${process.pid}-${crypto.randomBytes(12).toString("hex")}.tmp`);
   try {
     fs.writeFileSync(temporary, content, { encoding: "utf8", flag: "wx", mode: 0o600 });

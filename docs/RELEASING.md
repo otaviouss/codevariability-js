@@ -29,3 +29,8 @@ For npm trusted publishing use the requirements documented by npm (currently
 npm CLI 11.5.1+ and Node 22.14.0+). A trusted publisher requires explicit
 configuration in the registry. See
 https://docs.npmjs.com/trusted-publishers/ for the current procedure.
+
+Validate this candidate on Node 18, 22, and 24, including original, adversarial,
+and regression suites and fresh installations of the actual tarball. Source
+normalization IDs changed to v3 before the first publication; formula IDs stay
+v2. The package remains 0.2.0 because this candidate has never been published.

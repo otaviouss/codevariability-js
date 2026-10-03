@@ -10,7 +10,7 @@ the first public release.
 - [x] Metadata, CommonJS exports, CLI, version, and file allowlist checked.
 - [x] Lockfile installation and known-vulnerability check passed.
 - [x] JavaScript syntax checks and independent tests passed.
-- [x] Node CI passed in the new repository.
+- [ ] Run repository CI on the final remediated commit (local runtime matrix is validated separately).
 - [x] Clean npm package created and every tarball member inspected.
 - [x] Tarball installed into an empty npm project.
 - [x] CommonJS require, ESM default import, and installed CLI executed.

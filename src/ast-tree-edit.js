@@ -86,6 +86,7 @@ function normalizeAst(ast) {
 }
 
 function syntheticProgram(asts) {
+  if (asts.length === 0) return null;
   return new NormalizedAstNode("SyntheticProgram", asts.map((ast) =>
     new NormalizedAstNode("Fragment", [normalizeAst(ast)])));
 }
@@ -97,7 +98,7 @@ function countAstNodes(tree) {
   while (stack.length) {
     const node = stack.pop();
     count += 1;
-    stack.push(...node.children);
+    for (const child of node.children) stack.push(child);
   }
   return count;
 }

@@ -4,7 +4,8 @@ const crypto = require("crypto");
 const parser = require("@babel/parser");
 const { version: PARSER_VERSION } = require("@babel/parser/package.json");
 const { version: ADAPTER_VERSION } = require("../package.json");
-const { extractCodeFragments } = require("./fragments");
+const { TextDecoder } = require("util");
+const { extractCodeFragments, parserOptions } = require("./fragments");
 const {
   astChildren,
   syntheticProgram,
@@ -12,20 +13,11 @@ const {
 } = require("./ast-tree-edit");
 
 const CODE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".md", ".markdown"]);
-const PARSER_OPTIONS = {
-  sourceType: "module",
-  plugins: [
-    "jsx", "typescript", "decorators-legacy", "classProperties",
-    "classPrivateProperties", "classPrivateMethods", "optionalChaining",
-    "nullishCoalescingOperator", "topLevelAwait",
-  ],
-  errorRecovery: true,
-};
 const AST_NODE_TYPE_MULTISET_JACCARD_METRIC = "ast_node_type_multiset_jaccard";
 const AST_NODE_TYPE_MULTISET_JACCARD_METRIC_ID = "ast_node_type_multiset_jaccard_v2";
 const AST_TREE_EDIT_METRIC = "ast_tree_edit_similarity";
 const AST_TREE_EDIT_METRIC_ID = "ast_tree_edit_similarity_v2";
-const AST_CACHE_PIPELINE_VERSION = "babel_ast_pipeline_v2";
+const AST_CACHE_PIPELINE_VERSION = "babel_ast_pipeline_v3";
 
 function flattenAst(node, types = []) {
   if (!node || typeof node !== "object") return types;
@@ -33,18 +25,19 @@ function flattenAst(node, types = []) {
   while (pending.length) {
     const current = pending.pop();
     if (current.type) types.push(current.type);
-    pending.push(...astChildren(current).reverse());
+    const children = astChildren(current);
+    for (let index = children.length - 1; index >= 0; index -= 1) pending.push(children[index]);
   }
   return types;
 }
 
 function parseFragment(filePath, fragment, index) {
   try {
-    const ast = parser.parse(fragment.code, PARSER_OPTIONS);
+    const ast = parser.parse(fragment.code, parserOptions(fragment.language));
     if (ast.errors.length) throw ast.errors[0];
     return ast;
   } catch (error) {
-    throw new Error(`${filePath} (fragmento ${index + 1}, linha de origem ${fragment.startLine}): ${error.message}`);
+    throw new Error(`${filePath} (fragmento ${index + 1}, linha de origem ${fragment.startLine}): ${error.message}`, { cause: error });
   }
 }
 
@@ -67,13 +60,13 @@ const AST_METRIC_DEFINITIONS = Object.freeze({
   [AST_NODE_TYPE_MULTISET_JACCARD_METRIC]: Object.freeze({
     buildTree: (asts) => asts.flatMap((ast) => flattenAst(ast)),
     similarity: multisetJaccard,
-    normalization: "babel_ast_node_type_multiset_v2",
+    normalization: "babel_ast_node_type_multiset_v3",
     id: AST_NODE_TYPE_MULTISET_JACCARD_METRIC_ID,
   }),
   [AST_TREE_EDIT_METRIC]: Object.freeze({
     buildTree: syntheticProgram,
     similarity: treeEditSimilarity,
-    normalization: "babel_normalized_ast_tree_v2",
+    normalization: "babel_normalized_ast_tree_v3",
     id: AST_TREE_EDIT_METRIC_ID,
   }),
 });
@@ -124,9 +117,18 @@ function summarize(matrix) {
   };
 }
 
+function compareFileNames(left, right) {
+  const a = Array.from(left, (character) => character.codePointAt(0));
+  const b = Array.from(right, (character) => character.codePointAt(0));
+  for (let index = 0; index < Math.min(a.length, b.length); index += 1) {
+    if (a[index] !== b[index]) return a[index] - b[index];
+  }
+  return a.length - b.length;
+}
+
 function compareRankRows(left, right) {
   if (left.score !== right.score) return right.score - left.score;
-  return left.file < right.file ? -1 : left.file > right.file ? 1 : 0;
+  return compareFileNames(left.file, right.file);
 }
 
 function contentFingerprint(source, filePath) {
@@ -208,7 +210,11 @@ function analyzeFiles(paths, metrics, options = {}) {
   const warnings = [];
   const fragments = [];
   const rawSources = paths.map((filePath) => fs.readFileSync(filePath));
-  const sources = rawSources.map((source) => source.toString("utf8"));
+  const decoder = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
+  const sources = rawSources.map((source, index) => {
+    try { return decoder.decode(source); }
+    catch (error) { throw new Error(`${paths[index]}: UTF-8 inválido.`, { cause: error }); }
+  });
   const fingerprints = sources.map((source, index) => contentFingerprint(source, paths[index]));
   const astsByFile = paths.map((filePath, fileIndex) => {
     const file = path.basename(filePath);
@@ -220,7 +226,7 @@ function analyzeFiles(paths, metrics, options = {}) {
       end_line: item.startLine + item.code.split(/\r?\n/).length - 1,
     })) });
     const asts = extracted.fragments.map((fragment, index) => parseFragment(filePath, fragment, index))
-      .filter((ast) => ![".md", ".markdown"].includes(path.extname(filePath).toLowerCase()) || ast.program.body.length || ast.program.directives.length);
+      .filter((ast) => ast.program.body.length || ast.program.directives.length);
     onProgress({ phase: "parse", current: fileIndex + 1, total: paths.length, file });
     return asts;
   });
@@ -338,7 +344,7 @@ function filesInDirectory(directory) {
     .filter((entry) => entry.isFile())
     .map((entry) => entry.name)
     .filter((file) => CODE_EXTENSIONS.has(path.extname(file).toLowerCase()))
-    .sort((left, right) => left.localeCompare(right, undefined, { numeric: true, sensitivity: "base" }))
+    .sort(compareFileNames)
     .map((file) => path.join(directory, file));
 }
 

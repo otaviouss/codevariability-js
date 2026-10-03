@@ -122,3 +122,17 @@ to generate the reviewed npm tarball. See [CONTRIBUTING.md](https://github.com/o
 [PUBLICATION_CHECKLIST.md](https://github.com/otaviouss/codevariability-js/blob/main/PUBLICATION_CHECKLIST.md).
 
 MIT license, copyright 2026 Otávio Gomes. See [LICENSE](https://github.com/otaviouss/codevariability-js/blob/main/LICENSE).
+
+## Candidate compatibility
+
+Version 0.2.0 remains unreleased. Files select JS, JSX, TS, or TSX grammar by
+extension. Markdown fences use `js`/`javascript`, `jsx`, `ts`/`typescript`, or
+`tsx`; unlabeled fences use JS. Fences retain their code, including prefixes;
+prose, inline code, and HTML outside fences are ignored. Inputs must be valid
+UTF-8. Discovery and ranking ties use Unicode code-point order.
+
+Normalization and pipeline IDs now use v3; metric formula IDs remain v2.
+Previous pipeline cache records are not reused. Wide AST traversal avoids
+argument-count limits, but input size, parser resources, and total pair counts
+remain the caller's responsibility. See [metrics](docs/METRICS.md) and
+[API](docs/API.md) for empty-input behavior, budgets, and expected errors.

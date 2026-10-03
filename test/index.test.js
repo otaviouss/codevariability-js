@@ -33,8 +33,8 @@ function withSources(sources, callback) {
   }
 }
 
-function treeSimilarity(left, right) {
-  const extension = left.startsWith("```") || right.startsWith("```") ? ".md" : ".js";
+function treeSimilarity(left, right, sourceExtension = ".js") {
+  const extension = left.startsWith("```") || right.startsWith("```") ? ".md" : sourceExtension;
   return withSources({ ["left" + extension]: left, ["right" + extension]: right }, (paths) =>
     analyzeFiles(paths, AST_TREE_EDIT_METRIC).matrix[0][1]);
 }
@@ -329,8 +329,9 @@ test("preserves syntax-bearing scalar AST fields", () => {
     ["x[key]", "x.key"],
     ["x?.key", "x.key"],
     ["++x", "x++"],
-    ["function f(x?: number) {}", "function f(x: number) {}"],
   ]) assert.ok(treeSimilarity(left, right) < 1, `${left} versus ${right}`);
+  // TypeScript syntax must be tested as TypeScript under the explicit grammar.
+  assert.ok(treeSimilarity("function f(x?: number) {}", "function f(x: number) {}", ".ts") < 1);
 });
 
 test("uses n + m - 1 because maximum tree size is not a general TED bound", () => {
@@ -389,7 +390,7 @@ test("keeps multiple fragments under an ordered synthetic root", () => {
   const result = withSources({ "a.md": source, "b.md": source }, (paths) => analyzeFiles(paths, AST_TREE_EDIT_METRIC));
   assert.equal(result.metric, AST_TREE_EDIT_METRIC);
   assert.equal(result.fragments[0].count, 2);
-  assert.equal(result.metadata.normalization, "babel_normalized_ast_tree_v2");
+  assert.equal(result.metadata.normalization, "babel_normalized_ast_tree_v3");
 
   const a = "```js\nconst x = 1;\n```";
   const b = "```js\nprint(x);\n```";

@@ -33,7 +33,8 @@ standard deviation, quartiles, range, and mean variability (`1 - mean`).
 When no off-diagonal pair exists, similarity summary fields are null.
 
 `rankingsByMetric[metric]` and `ranking` contain `rank`, `file`, and `score`;
-ties are resolved by filename. `representativeness` contains per-metric scores,
+ties are resolved by filename in Unicode code-point order, independent of locale.
+`representativeness` contains per-metric scores,
 `structuralScore`, and `overallScore`. `mostRepresentative` and `mostDistinct`
 are the first and last rows of `ranking`.
 
@@ -45,6 +46,11 @@ metric schema only.
 
 `filesInDirectory(directory)` validates the directory, discovers supported
 regular files without recursion, and returns ordered paths.
+
+Discovery uses Unicode code-point order (not natural numeric ordering). Source
+input must be valid UTF-8; invalid or truncated encodings raise `Error`. A BOM
+and the valid Unicode replacement character are accepted. Select source/fence
+grammars as described in [METRICS.md](METRICS.md).
 
 ## Command line and errors
 
@@ -63,3 +69,11 @@ Invalid syntax and unsupported inputs raise `Error`; filesystem errors retain
 Node error information. Use trusted output and cache directories. Input programs
 are parsed, never executed. There are no JavaScript implementations of Python's
 text/token metrics or group permutation tests in this package.
+
+Wrapped parsing/decoding errors retain their original `cause`. The CLI creates
+missing output parent directories and replaces JSON atomically. An existing
+output symlink is rejected; callers must still trust ancestor directories.
+
+Node 18 compatibility is retained and tested, but Node 18 has reached end of
+life. Use a maintained Node LTS release for production deployments; check the
+[official release status](https://nodejs.org/en/about/previous-releases).

@@ -1,12 +1,20 @@
 # Structural metrics
 
-Babel parses JavaScript, JSX, TypeScript, and TSX. Parsing occurs synchronously
+Babel selects the grammar from `.js`, `.jsx`, `.ts`, or `.tsx`; JSX is enabled
+only for JSX/TSX and TypeScript only for TS/TSX. A `.ts` angle-bracket type
+assertion is therefore not interpreted as JSX. Parsing occurs synchronously
 and syntax errors stop the analysis. Source files are parsed in full, including
 strings containing fence delimiters. Markdown is scanned for labeled code
 fences; the first word identifies the language and extra information is
-permitted. Backtick and tilde fences must close. Empty/comment-only fragments
+permitted. `js`/`javascript`, `jsx`, `ts`/`typescript`, and `tsx` select the same
+grammars as source extensions; an unlabeled fence uses JavaScript. Prose,
+inline code, and embedded HTML outside fences are ignored. Unsupported fence
+languages raise an error. Backtick and tilde fences must close. Empty/comment-only fragments
 are ignored. A Markdown-only heuristic may split concatenated modules that
-start with `'use strict';`; it is not applied to source files. Transformations
+start with `'use strict';`; separators must be statements at program level.
+Markers inside strings, templates, comments, or functions do not split code.
+All code before the first separator is retained. The heuristic is not applied
+to source files. Transformations
 are recorded in warnings and original line positions in fragments.
 
 AST normalization preserves hierarchy, child order, syntax-node types,
@@ -39,6 +47,11 @@ approximate similarity. `maxCells: null` removes the budget and can require
 substantial memory/time. Parsing, input size, and the number of file pairs
 remain the caller's responsibility; parser limits also apply.
 
+Traversal uses iterative stacks, including wide child lists, without spreading
+children into function arguments. There is no new width cutoff. This does not
+bound parser memory, input bytes, or the total number of comparisons. Empty
+programs have no synthetic root and follow the documented empty-tree scores.
+
 The cache is keyed by source content, extension, adapter, parser, metric,
 pipeline, and normalization versions. It stores scores, not source content.
 Missing or invalid records are recomputed. Cache directories are trusted
@@ -48,3 +61,9 @@ Metadata records metric IDs, normalization IDs, runtime versions, and raw
 input SHA-256 hashes. Compare results only with compatible definitions and
 parser versions. Python and Babel have different grammars and tree node types;
 the packages do not promise cross-language score equivalence.
+
+The unreleased 0.2.0 candidate uses `babel_ast_pipeline_v3` and normalization
+IDs `babel_normalized_ast_tree_v3` / `babel_ast_node_type_multiset_v3` to identify
+the corrected grammar, Markdown, and empty-program behavior. Formula IDs stay
+at v2. Previous cache entries cannot match the new pipeline key. Results with
+different normalization IDs should not be pooled as equivalent observations.
